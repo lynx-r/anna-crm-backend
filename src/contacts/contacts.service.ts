@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
-import { validate, ValidationError } from 'class-validator';
+import { validate } from 'class-validator';
 import csv from 'csv-parser';
 import { Readable } from 'stream';
 import { Repository } from 'typeorm';
@@ -42,12 +42,19 @@ export class ContactsService {
     const rawData: CreateContactDto[] = await this.extractData(file);
 
     const contactsToSave: CreateContactDto[] = [];
-    const errors: { row: number; details: string | ValidationError[] }[] = [];
+    const report = {
+      total: rawData.length,
+      success: 0,
+      failed: 0,
+      errors: [] as { row: number; email?: string; messages: string[] }[],
+    };
     const seenNames = new Set<string>();
     const seenPhones = new Set<string>();
     const seenInns = new Set<string>();
 
     for (const [index, item] of rawData.entries()) {
+      const rowNumber = index + 2;
+
       const normalizedItem = this.mapRawData(item);
       // Если после маппинга объект пустой — скипаем
       if (Object.keys(normalizedItem).length === 0) {
@@ -59,33 +66,42 @@ export class ContactsService {
       // 2. Валидация (class-validator)
       const validationErrors = await validate(dto);
       if (validationErrors.length > 0) {
-        errors.push({ row: index + 2, details: validationErrors });
-        continue; // Пропускаем плохую запись
+        report.failed++;
+        report.errors.push({
+          row: rowNumber,
+          email: dto.email, // Чтобы легче было найти строку в файле
+          messages: validationErrors.flatMap((err) =>
+            Object.values(
+              err.constraints || { error: 'Unknown validation error' },
+            ),
+          ),
+        });
+        continue;
       }
 
       // 3. Проверка на дубликаты внутри файла
       if (seenNames.has(dto.name)) {
-        errors.push({
+        report.errors.push({
           row: index + 2,
-          details: `Дубликат названия компании в файле: ${dto.name}`,
+          messages: [`Дубликат названия компании в файле: ${dto.name}`],
         });
         continue;
       }
       seenNames.add(dto.name);
       // 3. Проверка на дубликаты внутри файла
       if (seenPhones.has(dto.phone)) {
-        errors.push({
+        report.errors.push({
           row: index + 2,
-          details: `Дубликат телефона в файле: ${dto.phone}`,
+          messages: [`Дубликат телефона в файле: ${dto.phone}`],
         });
         continue;
       }
       seenPhones.add(dto.phone);
       // 3. Проверка на дубликаты внутри файла
       if (seenInns.has(dto.inn)) {
-        errors.push({
+        report.errors.push({
           row: index + 2,
-          details: `Дубликат ИНН в файле: ${dto.inn}`,
+          messages: [`Дубликат ИНН в файле: ${dto.inn}`],
         });
         continue;
       }
@@ -104,11 +120,7 @@ export class ContactsService {
         .execute();
     }
 
-    return {
-      imported: contactsToSave.length,
-      failed: errors.length,
-      errors: errors, // Список ошибок для фронтенда
-    };
+    return report;
   }
 
   private mapRawData(rawItem: Record<string, any>): Partial<CreateContactDto> {
