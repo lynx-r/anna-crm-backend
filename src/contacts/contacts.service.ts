@@ -53,7 +53,7 @@ export class ContactsService {
     const seenInns = new Set<string>();
 
     for (const [index, item] of rawData.entries()) {
-      const rowNumber = index + 2;
+      const rowNumber = index;
 
       const normalizedItem = this.mapRawData(item);
       // Если после маппинга объект пустой — скипаем
