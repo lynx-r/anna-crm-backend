@@ -30,6 +30,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.3",
     "csv-parser": "^3.2.0",
+    "libphonenumber-js": "^1.12.36",
     "pg": "^8.18.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",

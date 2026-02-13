@@ -43,7 +43,9 @@ export class ContactsService {
 
     const contactsToSave: CreateContactDto[] = [];
     const errors: { row: number; details: string | ValidationError[] }[] = [];
-    const seenEmails = new Set<string>();
+    const seenNames = new Set<string>();
+    const seenPhones = new Set<string>();
+    const seenInns = new Set<string>();
 
     for (const [index, item] of rawData.entries()) {
       const normalizedItem = this.mapRawData(item);
@@ -57,19 +59,37 @@ export class ContactsService {
       // 2. Валидация (class-validator)
       const validationErrors = await validate(dto);
       if (validationErrors.length > 0) {
-        errors.push({ row: index + 1, details: validationErrors });
+        errors.push({ row: index + 2, details: validationErrors });
         continue; // Пропускаем плохую запись
       }
 
       // 3. Проверка на дубликаты внутри файла
-      if (seenEmails.has(dto.email)) {
+      if (seenNames.has(dto.name)) {
         errors.push({
-          row: index + 1,
-          details: `Дубликат email в файле: ${dto.email}`,
+          row: index + 2,
+          details: `Дубликат названия компании в файле: ${dto.name}`,
         });
         continue;
       }
-      seenEmails.add(dto.email);
+      seenNames.add(dto.name);
+      // 3. Проверка на дубликаты внутри файла
+      if (seenPhones.has(dto.phone)) {
+        errors.push({
+          row: index + 2,
+          details: `Дубликат телефона в файле: ${dto.phone}`,
+        });
+        continue;
+      }
+      seenPhones.add(dto.phone);
+      // 3. Проверка на дубликаты внутри файла
+      if (seenInns.has(dto.inn)) {
+        errors.push({
+          row: index + 2,
+          details: `Дубликат ИНН в файле: ${dto.inn}`,
+        });
+        continue;
+      }
+      seenInns.add(dto.inn);
       contactsToSave.push(dto);
     }
 

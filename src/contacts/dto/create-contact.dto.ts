@@ -1,12 +1,13 @@
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsPhoneNumber, IsString, Validate } from 'class-validator';
+import { IsInnValidConstraint } from '../validator/inn.validator';
 
 export class CreateContactDto {
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @IsString()
-  inn?: string;
+  @Validate(IsInnValidConstraint)
+  inn: string;
 
   @IsString()
   region?: string;
@@ -14,9 +15,9 @@ export class CreateContactDto {
   @IsString()
   contact?: string;
 
-  @IsString()
-  phone?: string;
+  @IsPhoneNumber('RU', { message: 'Некорректный российский номер телефона' })
+  phone: string;
 
-  @IsEmail({}, { message: 'Некорректный формат email' })
-  email: string;
+  @IsString()
+  email?: string;
 }
