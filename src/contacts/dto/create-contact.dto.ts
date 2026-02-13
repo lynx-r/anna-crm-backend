@@ -6,20 +6,16 @@ export class CreateContactDto {
   name: string;
 
   @IsString()
-  @IsNotEmpty()
-  inn: string;
+  inn?: string;
 
   @IsString()
-  @IsNotEmpty()
-  region: string;
+  region?: string;
 
   @IsString()
-  @IsNotEmpty()
-  contact: string;
+  contact?: string;
 
   @IsString()
-  @IsNotEmpty()
-  phone: string;
+  phone?: string;
 
   @IsEmail({}, { message: 'Некорректный формат email' })
   email: string;
