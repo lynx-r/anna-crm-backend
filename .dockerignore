@@ -1,0 +1,30 @@
+# Зависимости
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Сборка
+dist/
+build/
+
+# Переменные окружения (секреты)
+.env
+.env.production
+
+# Docker-специфичные файлы
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Git
+.git
+.gitignore
+
+# Прочее
+README.md
+LICENSE
+.vscode/
+.idea/
+.prettierrc
+.eslintrc.js
+test/
