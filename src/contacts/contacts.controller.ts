@@ -6,9 +6,13 @@ import {
   Param,
   Patch,
   Post,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ContactsService } from './contacts.service';
 import { CreateContactDto } from './dto/create-contact.dto';
+import { CreateContactsBatchDto } from './dto/create-contacts-batch.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 
 @Controller('contacts')
@@ -23,6 +27,17 @@ export class ContactsController {
   @Get()
   findAll() {
     return this.contactsService.findAll();
+  }
+
+  @Post('batch')
+  createMany(@Body() batchDto: CreateContactsBatchDto) {
+    return this.contactsService.createMany(batchDto.contacts);
+  }
+
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFile(@UploadedFile() file: Express.Multer.File) {
+    return this.contactsService.parseAndSave(file);
   }
 
   @Get(':id')
