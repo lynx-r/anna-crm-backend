@@ -46,7 +46,7 @@ export class ContactsService {
       total: rawData.length,
       success: 0,
       failed: 0,
-      errors: [] as { row: number; email?: string; messages: string[] }[],
+      errors: [] as { row: number; name?: string; messages: string[] }[],
     };
     const seenNames = new Set<string>();
     const seenPhones = new Set<string>();
@@ -69,7 +69,7 @@ export class ContactsService {
         report.failed++;
         report.errors.push({
           row: rowNumber,
-          email: dto.email, // Чтобы легче было найти строку в файле
+          name: dto.name, // Чтобы легче было найти строку в файле
           messages: validationErrors.flatMap((err) =>
             Object.values(
               err.constraints || { error: 'Unknown validation error' },
