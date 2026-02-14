@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
@@ -11,7 +11,7 @@ import { ParseService } from './parse.service';
 @Injectable()
 export class ContactsService {
   constructor(
-    @Inject(ParseService) private parseService: ParseService,
+    private parseService: ParseService,
     @InjectRepository(Contact) private contactsRepository: Repository<Contact>,
   ) {}
 
@@ -39,9 +39,7 @@ export class ContactsService {
       failed: 0,
       errors: [] as { row: number; name?: string; messages: string[] }[],
     };
-    const seenNames = new Set<string>();
-    const seenPhones = new Set<string>();
-    const seenInns = new Set<string>();
+    const seenNameInnPhone = new Set<string>();
 
     for (const [index, item] of rawData.entries()) {
       const rowNumber = index + 2;
@@ -71,32 +69,15 @@ export class ContactsService {
       }
 
       // 3. Проверка на дубликаты внутри файла
-      if (seenNames.has(dto.name)) {
+      const nameInnPhone = `${dto.name}::${dto.inn}::${dto.phone}`;
+      if (seenNameInnPhone.has(nameInnPhone)) {
         report.errors.push({
           row: index + 2,
-          messages: [`Дубликат названия компании в файле: ${dto.name}`],
+          messages: [`Дубликат в файле по Имя::ИНН::Телефон: ${nameInnPhone}`],
         });
         continue;
       }
-      seenNames.add(dto.name);
-      // 3. Проверка на дубликаты внутри файла
-      if (seenPhones.has(dto.phone)) {
-        report.errors.push({
-          row: index + 2,
-          messages: [`Дубликат телефона в файле: ${dto.phone}`],
-        });
-        continue;
-      }
-      seenPhones.add(dto.phone);
-      // 3. Проверка на дубликаты внутри файла
-      if (seenInns.has(dto.inn)) {
-        report.errors.push({
-          row: index + 2,
-          messages: [`Дубликат ИНН в файле: ${dto.inn}`],
-        });
-        continue;
-      }
-      seenInns.add(dto.inn);
+      seenNameInnPhone.add(nameInnPhone);
       contactsToSave.push(dto);
     }
 
