@@ -1,4 +1,12 @@
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from '@/users/entities/user.entity';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 @Index(['name', 'inn', 'phone'], { unique: true })
@@ -23,4 +31,11 @@ export class Contact {
 
   @Column({ nullable: true })
   email: string;
+
+  @ManyToOne(() => User, (user) => user.contacts)
+  @JoinColumn({ name: 'userId' })
+  user: User;
+
+  @Column()
+  userId: number;
 }

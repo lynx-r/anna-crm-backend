@@ -1,3 +1,4 @@
+import { GetUser } from '@/auth/decorators/get-user.decorator';
 import {
   BadRequestException,
   Body,
@@ -28,8 +29,8 @@ export class ContactsController {
   }
 
   @Get()
-  findAll() {
-    return this.contactsService.findAll();
+  findAll(@GetUser() user: { userId: number }) {
+    return this.contactsService.findAll(user.userId);
   }
 
   @Post('batch')
@@ -65,13 +66,16 @@ export class ContactsController {
       },
     }),
   )
-  async uploadFile(@UploadedFile() file: Express.Multer.File) {
-    return this.contactsService.parseAndSave(file);
+  async uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @GetUser() user: { userId: number },
+  ) {
+    return this.contactsService.parseAndSave(file, user.userId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.contactsService.findOne(+id);
+  findOne(@Param('id') id: string, @GetUser() user: { userId: number }) {
+    return this.contactsService.findOne(+id, user.userId);
   }
 
   @Patch(':id')

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
@@ -20,15 +20,18 @@ export class ContactsService {
     return this.contactsRepository.save(newContact);
   }
 
-  findAll() {
-    return this.contactsRepository.find();
+  findAll(userId: number) {
+    return this.contactsRepository.find({
+      where: { userId },
+      order: { id: 'DESC' },
+    });
   }
 
   createMany(createContactsDto: CreateContactDto[]) {
     return this.contactsRepository.insert(createContactsDto);
   }
 
-  async parseAndSave(file: Express.Multer.File) {
+  async parseAndSave(file: Express.Multer.File, userId: number) {
     const rawData: CreateContactDto[] =
       await this.parseService.extractData(file);
 
@@ -78,7 +81,12 @@ export class ContactsService {
         continue;
       }
       seenNameInnPhone.add(nameInnPhone);
-      contactsToSave.push(dto);
+
+      const contactEntity = {
+        ...dto,
+        userId: userId, // Связываем с текущим юзером
+      };
+      contactsToSave.push(contactEntity);
     }
 
     // 4. Массовое сохранение (с игнорированием дублей, которые уже есть в БД)
@@ -95,8 +103,17 @@ export class ContactsService {
     return report;
   }
 
-  findOne(id: number) {
-    return this.contactsRepository.findOneBy({ id });
+  async findOne(id: number, userId: number) {
+    const contact = await this.contactsRepository.findOne({
+      where: { id, userId },
+    });
+
+    if (!contact) {
+      throw new NotFoundException(
+        `Контакт с ID ${id} не найден или доступ запрещен`,
+      );
+    }
+    return contact;
   }
 
   update(id: number, updateContactDto: UpdateContactDto) {

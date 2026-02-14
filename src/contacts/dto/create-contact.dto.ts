@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsPhoneNumber, IsString, Validate } from 'class-validator';
-import { IsInnValidConstraint } from '../validator/inn.validator';
+import { IsInnValidConstraint } from '../validators/inn.validator';
 
 export class CreateContactDto {
   @IsString()
