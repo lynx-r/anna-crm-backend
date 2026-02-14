@@ -2,7 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, ILike, Repository } from 'typeorm';
+import { ContactPaginationDto } from './dto/contacts-pagination.dto';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 import { Contact } from './entities/contact.entity';
@@ -20,11 +21,39 @@ export class ContactsService {
     return this.contactsRepository.save(newContact);
   }
 
-  findAll(userId: number) {
-    return this.contactsRepository.find({
-      where: { userId },
+  async findAll(userId: number, query: ContactPaginationDto) {
+    const { page = 1, limit = 100, search } = query;
+    const skip = (page - 1) * limit;
+
+    let whereCondition:
+      | FindOptionsWhere<Contact>
+      | FindOptionsWhere<Contact>[] = { userId };
+
+    if (search) {
+      const searchPattern = `%${search}%`;
+      whereCondition = [
+        { userId, name: ILike(searchPattern) },
+        { userId, inn: ILike(searchPattern) },
+        { userId, phone: ILike(searchPattern) },
+      ];
+    }
+
+    const [data, total] = await this.contactsRepository.findAndCount({
+      where: whereCondition,
+      take: limit,
+      skip: skip,
       order: { id: 'DESC' },
     });
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        lastPage: Math.ceil(total / limit),
+      },
+    };
   }
 
   createMany(createContactsDto: CreateContactDto[]) {

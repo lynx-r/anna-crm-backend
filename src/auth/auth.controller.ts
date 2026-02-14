@@ -11,11 +11,13 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { GetUser } from './decorators/get-user.decorator';
+import { JwtPayloadDto } from './dto/jwt-payload.dto';
 import { LoginDto } from './dto/login.dto';
 import { Public } from './public.metadata';
 
@@ -25,6 +27,7 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private usersService: UsersService,
+    private configService: ConfigService,
   ) {}
 
   @Public()
@@ -52,25 +55,30 @@ export class AuthController {
     );
     await this.authService.updateRefreshToken(user.id, refresh_token);
 
+    const isProduction = this.configService.get('NODE_ENV') === 'production';
+
     res.cookie('refreshToken', refresh_token, {
       httpOnly: true,
-      secure: true, // true для https
-      sameSite: 'strict',
+      // Если НЕ продакшн, разрешаем передачу по http (secure: false)
+      secure: isProduction,
+      // На локалхосте 'lax' позволяет Swagger подхватывать куку лучше
+      sameSite: isProduction ? 'strict' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 дней
     });
 
     return { access_token };
   }
 
+  @Public()
   @UseGuards(AuthGuard('jwt-refresh'))
   @ApiOperation({ summary: 'Обновление access_token токенов' })
   @Post('refresh')
   async refresh(
-    @GetUser() user: UserDto,
+    @GetUser() user: JwtPayloadDto,
     @Res({ passthrough: true }) res: Response,
   ) {
     const { access_token, refresh_token } =
-      await this.authService.refreshTokens(user.id, user.refreshToken!);
+      await this.authService.refreshTokens(user.sub, user.refreshToken);
 
     res.cookie('refreshToken', refresh_token, {
       httpOnly: true,

@@ -9,6 +9,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -21,6 +22,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ContactsService } from './contacts.service';
+import { ContactPaginationDto } from './dto/contacts-pagination.dto';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { CreateContactsBatchDto } from './dto/create-contacts-batch.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
@@ -38,8 +40,8 @@ export class ContactsController {
 
   @Get()
   @ApiOperation({ summary: 'Получить все контакты пользователя' })
-  findAll(@GetUser() user: UserDto) {
-    return this.contactsService.findAll(user.id);
+  findAll(@GetUser() user: UserDto, @Query() query: ContactPaginationDto) {
+    return this.contactsService.findAll(user.id, query);
   }
 
   @Post('batch')

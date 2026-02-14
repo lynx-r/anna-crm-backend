@@ -61,13 +61,15 @@ export class AuthService {
   }
 
   async refreshTokens(userId: number, rt: string) {
-    const user = await this.usersService.findOneWithPasswordById(userId); // Создайте этот метод в UsersService
-    if (!user || !user.hashedRefreshToken)
+    const user = await this.usersService.findOneWithRefreshTokenById(userId); // Создайте этот метод в UsersService
+    if (!user || !user.hashedRefreshToken) {
       throw new ForbiddenException('Access Denied');
-
+    }
     // Сравниваем присланный RT с хешем в базе
     const rtMatches = await bcrypt.compare(rt, user.hashedRefreshToken);
-    if (!rtMatches) throw new ForbiddenException('Access Denied');
+    if (!rtMatches) {
+      throw new ForbiddenException('Access Denied');
+    }
 
     // Генерируем новую пару
     const tokens = await this.getTokens(user.id, user.email);
@@ -76,7 +78,7 @@ export class AuthService {
   }
 
   async updateRefreshToken(userId: number, refreshToken: string) {
-    const hash = await bcrypt.hash(refreshToken, 10);
-    await this.usersService.update(userId, { hashedRefreshToken: hash });
+    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    this.usersService.update(userId, { hashedRefreshToken });
   }
 }

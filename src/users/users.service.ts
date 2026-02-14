@@ -26,17 +26,16 @@ export class UsersService {
 
   // Метод для поиска по email с паролем (вызывается из AuthService.validateUser)
   async findOneWithPassword(email: string): Promise<User | null> {
-    console.log(await this.usersRepository.find());
     return await this.usersRepository.findOne({
       where: { email },
       select: ['id', 'email', 'password'], // Явно просим вернуть пароль
     });
   }
 
-  async findOneWithPasswordById(userId: number): Promise<User | null> {
+  async findOneWithRefreshTokenById(userId: number): Promise<User | null> {
     return await this.usersRepository.findOne({
       where: { id: userId },
-      select: ['id', 'email', 'password'], // Явно просим вернуть пароль
+      select: ['id', 'email', 'hashedRefreshToken'], // Явно просим вернуть пароль
     });
   }
 
@@ -46,6 +45,6 @@ export class UsersService {
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
-    return this.usersRepository.update(id, updateUserDto);
+    this.usersRepository.update(id, updateUserDto);
   }
 }

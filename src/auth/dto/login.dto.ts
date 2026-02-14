@@ -11,6 +11,6 @@ export class LoginDto {
   email: string;
 
   @IsStrongPassword()
-  @ApiProperty({ example: 'password123', description: 'Сильный пароль' })
+  @ApiProperty({ example: 'passwordDD123!!', description: 'Сильный пароль' })
   password: string;
 }

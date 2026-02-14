@@ -18,6 +18,12 @@ async function bootstrap() {
 
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
+  app.enableCors({
+    origin: true, // В разработке можно так, в продакшене укажите конкретный домен
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true, // ОБЯЗАТЕЛЬНО для пересылки Cookies
+  });
+
   app.use(cookieParser());
 
   const config = new DocumentBuilder()
