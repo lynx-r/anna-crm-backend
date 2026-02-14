@@ -1,4 +1,4 @@
-import { GetUser } from '@/auth/decorators/get-user.decorator';
+import { GetUser } from '@app/auth/decorators/get-user.decorator';
 import {
   BadRequestException,
   Body,

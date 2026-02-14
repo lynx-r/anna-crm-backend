@@ -1,4 +1,5 @@
-import { CreateUserDto } from '@/users/dto/create-user.dto';
+import { CreateUserDto } from '@app/users/dto/create-user.dto';
+import { UserDto } from '@app/users/dto/user.dto';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import bcrypt from 'bcrypt';
@@ -20,17 +21,21 @@ export class AuthService {
     return this.login(user);
   }
 
-  async validateUser(email: string, pass: string): Promise<any> {
+  async validateUser(email: string, pass: string): Promise<UserDto | null> {
     const user = await this.usersService.findOneWithPassword(email);
     if (user && (await bcrypt.compare(pass, user.password))) {
-      const { password, ...result } = user;
-      return result;
+      const result = { ...user };
+      // @ts-expect-error: Удаляем пароль перед возвратом данных
+      delete result.password;
     }
     return null;
   }
 
-  async login(user: any) {
-    const payload = { email: user.email, sub: user.userId };
+  login(user: UserDto) {
+    const payload = {
+      email: user.email,
+      sub: user.id,
+    };
     return {
       access_token: this.jwtService.sign(payload),
     };
