@@ -10,19 +10,19 @@ export class CreateContactDto {
   @IsNotEmpty()
   @IsString()
   @Transform(({ value }: { value: unknown }) =>
-    typeof value === 'string' ? value.trim() : value,
+    typeof value === 'string' ? value.trim().toUpperCase() : value,
   )
   @Validate(IsInnValidConstraint)
   inn: string;
+
+  @IsPhoneNumber('RU', { message: 'Некорректный российский номер телефона' })
+  phone: string;
 
   @IsString()
   region?: string;
 
   @IsString()
   contact?: string;
-
-  @IsPhoneNumber('RU', { message: 'Некорректный российский номер телефона' })
-  phone: string;
 
   @IsString()
   email?: string;

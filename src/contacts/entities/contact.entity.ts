@@ -1,6 +1,7 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
+@Index(['name', 'inn', 'phone'], { unique: true })
 export class Contact {
   @PrimaryGeneratedColumn()
   id: number;
@@ -12,14 +13,14 @@ export class Contact {
   inn: string;
 
   @Column()
-  region: string;
-
-  @Column()
-  contact: string;
-
-  @Column()
   phone: string;
 
-  @Column()
+  @Column({ nullable: true })
+  region: string;
+
+  @Column({ nullable: true })
+  contact: string;
+
+  @Column({ nullable: true })
   email: string;
 }
