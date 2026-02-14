@@ -1,6 +1,7 @@
-import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser';
 import 'module-alias/register';
 import { AppModule } from './app.module';
 
@@ -14,6 +15,10 @@ async function bootstrap() {
       transform: true, // Автоматически преобразует типы (например, строку в число)
     }),
   );
+
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+
+  app.use(cookieParser());
 
   const config = new DocumentBuilder()
     .setTitle('Contacts API')

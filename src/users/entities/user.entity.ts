@@ -12,6 +12,9 @@ export class User {
   @Column({ select: false }) // Пароль не будет подтягиваться обычным find()
   password: string;
 
+  @Column({ type: 'text', nullable: true, select: false })
+  hashedRefreshToken?: string | null;
+
   @OneToMany(() => Contact, (contact) => contact.user)
   contacts: Contact[];
 }
