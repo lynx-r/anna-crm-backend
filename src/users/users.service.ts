@@ -26,6 +26,7 @@ export class UsersService {
 
   // Метод для поиска по email с паролем (вызывается из AuthService.validateUser)
   async findOneWithPassword(email: string): Promise<User | null> {
+    console.log(await this.usersRepository.find());
     return await this.usersRepository.findOne({
       where: { email },
       select: ['id', 'email', 'password'], // Явно просим вернуть пароль

@@ -1,4 +1,5 @@
 import { GetUser } from '@app/auth/decorators/get-user.decorator';
+import { UserDto } from '@app/users/dto/user.dto';
 import {
   BadRequestException,
   Body,
@@ -12,13 +13,20 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ContactsService } from './contacts.service';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { CreateContactsBatchDto } from './dto/create-contacts-batch.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 
 @ApiTags('contacts')
+@ApiBearerAuth('access_token')
 @Controller('contacts')
 export class ContactsController {
   constructor(private readonly contactsService: ContactsService) {}
@@ -29,8 +37,9 @@ export class ContactsController {
   }
 
   @Get()
-  findAll(@GetUser() user: { userId: number }) {
-    return this.contactsService.findAll(user.userId);
+  @ApiOperation({ summary: 'Получить все контакты пользователя' })
+  findAll(@GetUser() user: UserDto) {
+    return this.contactsService.findAll(user.id);
   }
 
   @Post('batch')
@@ -68,14 +77,14 @@ export class ContactsController {
   )
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
-    @GetUser() user: { userId: number },
+    @GetUser() user: UserDto,
   ) {
-    return this.contactsService.parseAndSave(file, user.userId);
+    return this.contactsService.parseAndSave(file, user.id);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @GetUser() user: { userId: number }) {
-    return this.contactsService.findOne(+id, user.userId);
+  findOne(@Param('id') id: string, @GetUser() user: UserDto) {
+    return this.contactsService.findOne(+id, user.id);
   }
 
   @Patch(':id')

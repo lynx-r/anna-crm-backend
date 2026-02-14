@@ -21,8 +21,20 @@ async function bootstrap() {
   app.use(cookieParser());
 
   const config = new DocumentBuilder()
-    .setTitle('Contacts API')
+    .setTitle('Anna CRM API')
     .setVersion('1.0')
+    .addBearerAuth(
+      // Добавляем поддержку Bearer токенов
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Введите JWT токен',
+        in: 'header',
+      },
+      'access_token', // Название схемы (используется в декораторах)
+    )
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
