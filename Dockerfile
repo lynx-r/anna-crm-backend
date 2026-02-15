@@ -12,6 +12,7 @@ RUN npm install
 
 # Копируем весь исходный код
 COPY . .
+COPY .env.example .env
 
 # Собираем TypeScript проект в папку /dist
 RUN npm run build

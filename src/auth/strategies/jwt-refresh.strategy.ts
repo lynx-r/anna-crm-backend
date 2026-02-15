@@ -24,7 +24,9 @@ export class JwtRefreshStrategy extends PassportStrategy(
 
   validate(req: Request, payload: JwtPayloadDto) {
     const refreshToken = (req.cookies?.refreshToken as string) || undefined;
-    if (!refreshToken) throw new ForbiddenException('Refresh token missing');
+    if (!refreshToken) {
+      throw new ForbiddenException('Refresh token missing');
+    }
 
     // Возвращаем данные пользователя и сам токен для дальнейшей проверки в БД
     return { ...payload, refreshToken };

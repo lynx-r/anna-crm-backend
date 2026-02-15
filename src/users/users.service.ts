@@ -28,14 +28,14 @@ export class UsersService {
   async findOneWithPassword(email: string): Promise<User | null> {
     return await this.usersRepository.findOne({
       where: { email },
-      select: ['id', 'email', 'password'], // Явно просим вернуть пароль
+      select: ['id', 'email', 'role', 'password'], // Явно просим вернуть пароль
     });
   }
 
   async findOneWithRefreshTokenById(userId: number): Promise<User | null> {
     return await this.usersRepository.findOne({
       where: { id: userId },
-      select: ['id', 'email', 'hashedRefreshToken'], // Явно просим вернуть пароль
+      select: ['id', 'email', 'role', 'hashedRefreshToken'], // Явно просим вернуть пароль
     });
   }
 
@@ -44,7 +44,7 @@ export class UsersService {
     return await this.usersRepository.findOne({ where: { id } });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    this.usersRepository.update(id, updateUserDto);
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    await this.usersRepository.update(id, updateUserDto);
   }
 }

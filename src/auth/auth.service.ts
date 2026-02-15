@@ -1,5 +1,6 @@
 import { CreateUserDto } from '@app/users/dto/create-user.dto';
 import { UserDto } from '@app/users/dto/user.dto';
+import { UserRole } from '@app/users/entities/user-role.enum';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -38,22 +39,23 @@ export class AuthService {
     const payload = {
       email: user.email,
       sub: user.id,
+      role: user.role,
     };
     return {
       access_token: this.jwtService.sign(payload),
     };
   }
 
-  async getTokens(userId: number, email: string) {
-    const payload = { sub: userId, email };
+  async getTokens(userId: number, email: string, role: UserRole) {
+    const payload = { sub: userId, email, role };
     const [access_token, refresh_token] = await Promise.all([
       this.jwtService.signAsync(payload, {
         secret: this.configService.get('JWT_ACCESS_SECRET'),
-        expiresIn: '15m',
+        expiresIn: this.configService.get('JWT_ACCESS_EXPIRES_IN'),
       }),
       this.jwtService.signAsync(payload, {
         secret: this.configService.get('JWT_REFRESH_SECRET'),
-        expiresIn: '7d',
+        expiresIn: this.configService.get('JWT_REFRESH_EXPIRES_IN'),
       }),
     ]);
 
@@ -72,13 +74,13 @@ export class AuthService {
     }
 
     // Генерируем новую пару
-    const tokens = await this.getTokens(user.id, user.email);
+    const tokens = await this.getTokens(user.id, user.email, user.role);
     await this.updateRefreshToken(user.id, tokens.refresh_token);
     return tokens;
   }
 
   async updateRefreshToken(userId: number, refreshToken: string) {
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
-    this.usersService.update(userId, { hashedRefreshToken });
+    await this.usersService.update(userId, { hashedRefreshToken });
   }
 }

@@ -101,7 +101,7 @@ export class ContactsService {
       }
 
       // 3. Проверка на дубликаты внутри файла
-      const nameInnPhone = `${dto.name}::${dto.inn}::${dto.phone}`;
+      const nameInnPhone = `${dto.name.toUpperCase()}::${dto.inn}::${dto.phone}`;
       if (seenNameInnPhone.has(nameInnPhone)) {
         report.errors.push({
           row: index + 2,

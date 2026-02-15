@@ -1,5 +1,7 @@
+import { Auth } from '@app/auth/decorators/auth.decorator';
 import { GetUser } from '@app/auth/decorators/get-user.decorator';
 import { UserDto } from '@app/users/dto/user.dto';
+import { UserRole } from '@app/users/entities/user-role.enum';
 import {
   BadRequestException,
   Body,
@@ -14,13 +16,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiConsumes,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ContactsService } from './contacts.service';
 import { ContactPaginationDto } from './dto/contacts-pagination.dto';
 import { CreateContactDto } from './dto/create-contact.dto';
@@ -28,7 +24,7 @@ import { CreateContactsBatchDto } from './dto/create-contacts-batch.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 
 @ApiTags('contacts')
-@ApiBearerAuth('access_token')
+@Auth(UserRole.USER)
 @Controller('contacts')
 export class ContactsController {
   constructor(private readonly contactsService: ContactsService) {}

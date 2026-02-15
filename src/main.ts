@@ -43,7 +43,14 @@ async function bootstrap() {
     )
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  // if (process.env.NODE_ENV !== 'production') {
+  SwaggerModule.setup('api', app, document, {
+    swaggerOptions: {
+      // Включает режим "Try it out" автоматически для всех методов
+      tryItOutEnabled: true,
+    },
+  });
+  // }
 
   await app.listen(process.env.PORT ?? 3000);
 }

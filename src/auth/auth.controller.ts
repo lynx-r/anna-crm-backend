@@ -1,5 +1,6 @@
 import { CreateUserDto } from '@app/users/dto/create-user.dto';
 import { UserDto } from '@app/users/dto/user.dto';
+import { UserRole } from '@app/users/entities/user-role.enum';
 import { UsersService } from '@app/users/users.service';
 import {
   Body,
@@ -16,10 +17,10 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
+import { Auth } from './decorators/auth.decorator';
 import { GetUser } from './decorators/get-user.decorator';
 import { JwtPayloadDto } from './dto/jwt-payload.dto';
 import { LoginDto } from './dto/login.dto';
-import { Public } from './public.metadata';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -30,16 +31,16 @@ export class AuthController {
     private configService: ConfigService,
   ) {}
 
-  @Public()
+  // @Public()
   @Post('register')
   @ApiOperation({ summary: 'Регистрация нового пользователя' })
   register(@Body() dto: CreateUserDto) {
     return this.authService.register(dto);
   }
 
-  @Public()
-  @ApiOperation({ summary: 'Авторизация и получение токенов' })
+  // @Public()
   @Post('login')
+  @ApiOperation({ summary: 'Авторизация и получение токенов' })
   async login(
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
@@ -52,6 +53,7 @@ export class AuthController {
     const { access_token, refresh_token } = await this.authService.getTokens(
       user.id,
       user.email,
+      user.role,
     );
     await this.authService.updateRefreshToken(user.id, refresh_token);
 
@@ -69,10 +71,10 @@ export class AuthController {
     return { access_token };
   }
 
-  @Public()
+  // @Public()
+  @Post('refresh')
   @UseGuards(AuthGuard('jwt-refresh'))
   @ApiOperation({ summary: 'Обновление access_token токенов' })
-  @Post('refresh')
   async refresh(
     @GetUser() user: JwtPayloadDto,
     @Res({ passthrough: true }) res: Response,
@@ -92,6 +94,7 @@ export class AuthController {
 
   // // @Public()
   @Post('logout')
+  @Auth(UserRole.USER, UserRole.ADMIN)
   @ApiOperation({ summary: 'Выход' })
   async logout(
     @GetUser() user: UserDto,
@@ -102,6 +105,7 @@ export class AuthController {
   }
 
   @Get('me')
+  @Auth(UserRole.USER, UserRole.ADMIN)
   @ApiOperation({ summary: 'Профиль пользователя' })
   getMe(@Req() req: Request) {
     return req.user;

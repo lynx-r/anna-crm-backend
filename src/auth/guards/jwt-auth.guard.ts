@@ -1,22 +1,23 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
+import { Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { IS_PUBLIC_KEY } from '../public.metadata';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-  constructor(private reflector: Reflector) {
-    super();
-  }
-
-  canActivate(context: ExecutionContext) {
-    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
-    if (isPublic) {
-      return true;
-    }
-    return super.canActivate(context);
-  }
+  // constructor(private reflector: Reflector) {
+  //   super();
+  // }
+  // canActivate(context: ExecutionContext) {
+  //   console.log('???');
+  //   const canActivate = super.canActivate(context);
+  //   console.log(canActivate);
+  //   return canActivate;
+  // }
+  // handleRequest(err, user, info) {
+  //   if (err || !user) {
+  //     // info содержит причину (например, "TokenExpiredError" или "JsonWebTokenError")
+  //     console.log('❌ JWT Error Info:', info?.message);
+  //     throw err || new UnauthorizedException(info?.message || 'Invalid token');
+  //   }
+  //   return user;
+  // }
 }
