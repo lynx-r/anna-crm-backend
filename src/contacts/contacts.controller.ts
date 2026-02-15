@@ -16,11 +16,18 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ContactsService } from './contacts.service';
 import { ContactPaginationDto } from './dto/contacts-pagination.dto';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { CreateContactsBatchDto } from './dto/create-contacts-batch.dto';
+import { UUIDParamDto } from './dto/params.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 
 @ApiTags('contacts')
@@ -81,7 +88,21 @@ export class ContactsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @GetUser() user: UserDto) {
+  @ApiOperation({ summary: 'Получить контакт по ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Контакт успешно найден',
+    schema: {
+      example: {
+        id: '550e8400-e29b-41d4-a716-446655440000',
+        companyName: 'ООО Ромашка',
+        inn: '7701020304',
+        phone: '+79991234567',
+        userId: 1,
+      },
+    },
+  })
+  findOne(@Param() { id }: UUIDParamDto, @GetUser() user: UserDto) {
     return this.contactsService.findOne(id, user.id);
   }
 
