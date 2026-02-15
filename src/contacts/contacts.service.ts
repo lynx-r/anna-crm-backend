@@ -21,7 +21,7 @@ export class ContactsService {
     return this.contactsRepository.save(newContact);
   }
 
-  async findAll(userId: number, query: ContactPaginationDto) {
+  async findAll(userId: string, query: ContactPaginationDto) {
     const { page = 1, limit = 100, search } = query;
     const skip = (page - 1) * limit;
 
@@ -60,7 +60,7 @@ export class ContactsService {
     return this.contactsRepository.insert(createContactsDto);
   }
 
-  async parseAndSave(file: Express.Multer.File, userId: number) {
+  async parseAndSave(file: Express.Multer.File, userId: string) {
     const rawData: CreateContactDto[] =
       await this.parseService.extractData(file);
 
@@ -132,7 +132,7 @@ export class ContactsService {
     return report;
   }
 
-  async findOne(id: number, userId: number) {
+  async findOne(id: string, userId: string) {
     const contact = await this.contactsRepository.findOne({
       where: { id, userId },
     });

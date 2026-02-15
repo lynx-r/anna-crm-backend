@@ -32,7 +32,7 @@ export class UsersService {
     });
   }
 
-  async findOneWithRefreshTokenById(userId: number): Promise<User | null> {
+  async findOneWithRefreshTokenById(userId: string): Promise<User | null> {
     return await this.usersRepository.findOne({
       where: { id: userId },
       select: ['id', 'email', 'role', 'hashedRefreshToken'], // Явно просим вернуть пароль
@@ -40,11 +40,11 @@ export class UsersService {
   }
 
   // Обычный поиск (для JwtStrategy)
-  async findOne(id: number): Promise<User | null> {
+  async findOne(id: string): Promise<User | null> {
     return await this.usersRepository.findOne({ where: { id } });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto) {
     await this.usersRepository.update(id, updateUserDto);
   }
 }

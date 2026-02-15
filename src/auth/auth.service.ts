@@ -46,7 +46,7 @@ export class AuthService {
     };
   }
 
-  async getTokens(userId: number, email: string, role: UserRole) {
+  async getTokens(userId: string, email: string, role: UserRole) {
     const payload = { sub: userId, email, role };
     const [access_token, refresh_token] = await Promise.all([
       this.jwtService.signAsync(payload, {
@@ -62,7 +62,7 @@ export class AuthService {
     return { access_token, refresh_token };
   }
 
-  async refreshTokens(userId: number, rt: string) {
+  async refreshTokens(userId: string, rt: string) {
     const user = await this.usersService.findOneWithRefreshTokenById(userId); // Создайте этот метод в UsersService
     if (!user || !user.hashedRefreshToken) {
       throw new ForbiddenException('Access Denied');
@@ -79,7 +79,7 @@ export class AuthService {
     return tokens;
   }
 
-  async updateRefreshToken(userId: number, refreshToken: string) {
+  async updateRefreshToken(userId: string, refreshToken: string) {
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
     await this.usersService.update(userId, { hashedRefreshToken });
   }

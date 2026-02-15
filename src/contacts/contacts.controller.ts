@@ -82,7 +82,7 @@ export class ContactsController {
 
   @Get(':id')
   findOne(@Param('id') id: string, @GetUser() user: UserDto) {
-    return this.contactsService.findOne(+id, user.id);
+    return this.contactsService.findOne(id, user.id);
   }
 
   @Patch(':id')

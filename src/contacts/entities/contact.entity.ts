@@ -11,8 +11,8 @@ import {
 @Entity()
 @Index(['name', 'inn', 'phone'], { unique: true })
 export class Contact {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   name: string;
@@ -37,5 +37,5 @@ export class Contact {
   user: User;
 
   @Column()
-  userId: number;
+  userId: string;
 }
