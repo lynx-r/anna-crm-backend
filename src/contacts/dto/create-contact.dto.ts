@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsPhoneNumber, IsString, Validate } from 'class-validator';
+import { IsNotEmpty, IsString, Validate } from 'class-validator';
+import { IsRussianPhone } from '../decorators/is-russian-phone.decorator';
 import { IsInnValidConstraint } from '../validators/inn.validator';
 
 export class CreateContactDto {
@@ -26,7 +27,7 @@ export class CreateContactDto {
     example: '+79991234567',
     description: 'Номер телефона в международном формате',
   })
-  @IsPhoneNumber('RU', { message: 'Некорректный российский номер телефона' })
+  @IsRussianPhone()
   phone: string;
 
   @ApiProperty({
